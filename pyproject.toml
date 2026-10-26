@@ -7,7 +7,7 @@ name = "ai-engineering-blueprints"
 version = "0.1.0"
 description = "Production-grade architectural patterns, resilient LLM gateways, and contract-first AI blueprints."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [
     { name = "Your Name", email = "your.email@example.com" }
@@ -39,14 +39,14 @@ packages = ["src/blueprint_core"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
 ignore = []
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.10"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
