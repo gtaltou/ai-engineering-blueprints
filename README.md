@@ -1,5 +1,8 @@
 # AI Engineering Blueprints
 
+[![Quality Gate CI](https://github.com/gtaltou/ai-engineering-blueprints/actions/workflows/ci.yml/badge.svg)](https://github.com/gtaltou/ai-engineering-blueprints/actions/workflows/ci.yml)
+
+
 Production-grade architectural blueprints for building resilient, contract-first, and cost-controlled AI systems.
 
 ## Architectural Posture
