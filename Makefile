@@ -1,21 +1,22 @@
-.PHONY: install lint format typecheck test check run-bp01
+.PHONY: install lint typecheck test check clean
 
 install:
+python -m pip install --upgrade pip
 pip install -e ".[dev]"
 
 lint:
-ruff check src/ blueprints/ tests/
-
-format:
-ruff format src/ blueprints/ tests/
+ruff check .
+ruff format --check .
 
 typecheck:
-mypy src/ blueprints/
+mypy src tests
+mypy blueprints/01_structured_web_ingestion/pipeline.py
+mypy blueprints/02_hybrid_rag_reranking/pipeline.py
 
 test:
 pytest
 
 check: lint typecheck test
 
-run-bp01:
-python blueprints/01_structured_web_ingestion/pipeline.py
+clean:
+rm -rf build dist *.egg-info .pytest_cache .mypy_cache .ruff_cache
