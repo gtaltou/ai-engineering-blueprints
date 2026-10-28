@@ -67,7 +67,5 @@ class GroundedAnswer(BaseModel):
     @model_validator(mode="after")
     def _enforce_citations_when_confident(self) -> GroundedAnswer:
         if self.has_sufficient_context and not self.citations:
-            raise ValueError(
-                "citations cannot be empty when has_sufficient_context is True."
-            )
+            raise ValueError("citations cannot be empty when has_sufficient_context is True.")
         return self

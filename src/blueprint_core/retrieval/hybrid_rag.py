@@ -63,8 +63,7 @@ class HybridRRFIndex:
                 doc_freq[token] = doc_freq.get(token, 0) + 1
 
         self._idf = {
-            token: math.log((1.0 + num_docs) / (1.0 + df)) + 1.0
-            for token, df in doc_freq.items()
+            token: math.log((1.0 + num_docs) / (1.0 + df)) + 1.0 for token, df in doc_freq.items()
         }
 
     def search(self, query: str, top_k: int = 3) -> list[RetrievedChunk]:
@@ -89,9 +88,7 @@ class HybridRRFIndex:
         lexical_sorted = sorted(lexical_scores, key=lambda item: item[1], reverse=True)
         semantic_sorted = sorted(semantic_scores, key=lambda item: item[1], reverse=True)
 
-        lexical_ranks = {
-            doc_idx: rank for rank, (doc_idx, _) in enumerate(lexical_sorted, start=1)
-        }
+        lexical_ranks = {doc_idx: rank for rank, (doc_idx, _) in enumerate(lexical_sorted, start=1)}
         semantic_ranks = {
             doc_idx: rank for rank, (doc_idx, _) in enumerate(semantic_sorted, start=1)
         }
@@ -100,9 +97,7 @@ class HybridRRFIndex:
         for idx, chunk in enumerate(self._chunks):
             lex_rank = lexical_ranks[idx]
             sem_rank = semantic_ranks[idx]
-            rrf_score = (1.0 / (self._rrf_k + lex_rank)) + (
-                1.0 / (self._rrf_k + sem_rank)
-            )
+            rrf_score = (1.0 / (self._rrf_k + lex_rank)) + (1.0 / (self._rrf_k + sem_rank))
             fused_results.append(
                 RetrievedChunk(
                     chunk=chunk,
