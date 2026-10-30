@@ -1,60 +1,53 @@
-param (
+param(
     [Parameter(Position=0)]
-    [ValidateSet("install", "lint", "typecheck", "test", "check", "clean")]
+    [ValidateSet("install", "lint", "typecheck", "test", "check")]
     [string]$Task = "check"
 )
 
 $ErrorActionPreference = "Stop"
+$VenvBin = ".\.venv\Scripts"
 
-function Run-Install {
-    Write-Host "Installing package and development dependencies..." -ForegroundColor Cyan
-    python -m pip install --upgrade pip
-    pip install -e ".[dev]"
+function Invoke-Install {
+    Write-Host "Installing dependencies in editable mode..." -ForegroundColor Cyan
+    & "$VenvBin\pip.exe" install -e ".[dev]"
 }
 
-function Run-Lint {
+function Invoke-Lint {
     Write-Host "Running Ruff linter and formatter check..." -ForegroundColor Cyan
-    ruff check .
+    & "$VenvBin\ruff.exe" check .
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    ruff format --check .
+    & "$VenvBin\ruff.exe" format --check .
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
-function Run-Typecheck {
+function Invoke-Typecheck {
     Write-Host "Running strict Mypy static type checker..." -ForegroundColor Cyan
-    mypy src tests
+    & "$VenvBin\mypy.exe" src tests
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    mypy blueprints/01_structured_web_ingestion/pipeline.py
+    & "$VenvBin\mypy.exe" blueprints/01_structured_web_ingestion/pipeline.py
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    mypy blueprints/02_hybrid_rag_reranking/pipeline.py
+    & "$VenvBin\mypy.exe" blueprints/02_hybrid_rag_reranking/pipeline.py
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    & "$VenvBin\mypy.exe" blueprints/03_agentic_tool_use_and_reflection/pipeline.py
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
-function Run-Test {
+function Invoke-Test {
     Write-Host "Running Pytest unit test suite..." -ForegroundColor Cyan
-    pytest
+    & "$VenvBin\pytest.exe"
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-}
-
-function Run-Clean {
-    Write-Host "Cleaning build, test, and cache artifacts..." -ForegroundColor Yellow
-    $dirs = @("build", "dist", ".pytest_cache", ".mypy_cache", ".ruff_cache", "src/blueprint_core.egg-info")
-    foreach ($d in $dirs) {
-        if (Test-Path $d) { Remove-Item -Recurse -Force $d }
-    }
 }
 
 switch ($Task) {
-    "install"   { Run-Install }
-    "lint"      { Run-Lint }
-    "typecheck" { Run-Typecheck }
-    "test"      { Run-Test }
-    "clean"     { Run-Clean }
+    "install"   { Invoke-Install }
+    "lint"      { Invoke-Lint }
+    "typecheck" { Invoke-Typecheck }
+    "test"      { Invoke-Test }
     "check"     {
-        Write-Host "Running full quality gate (Lint + Format + Typecheck + Tests)..." -ForegroundColor Green
-        Run-Lint
-        Run-Typecheck
-        Run-Test
+        Write-Host "Running full quality gate (Lint + Format + Typecheck + Tests)..." -ForegroundColor Yellow
+        Invoke-Lint
+        Invoke-Typecheck
+        Invoke-Test
         Write-Host "All quality checks passed!" -ForegroundColor Green
     }
 }
