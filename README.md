@@ -1,91 +1,51 @@
 # AI Engineering Blueprints
 
-[![CI Quality Gate](https://github.com/RostaneF/ai-engineering-blueprints/actions/workflows/ci.yml/badge.svg)](https://github.com/RostaneF/ai-engineering-blueprints/actions/workflows/ci.yml)
-![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+[![CI Quality Gate](https://github.com/gtaltou/ai-engineering-blueprints/actions/workflows/ci.yml/badge.svg)](https://github.com/gtaltou/ai-engineering-blueprints/actions/workflows/ci.yml)
+![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)
+![Mypy Strict](https://img.shields.io/badge/mypy-strict-brightgreen.svg)
 ![Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)
-![Mypy](https://img.shields.io/badge/types-mypy%20strict-blue.svg)
 
-Production-grade architectural patterns for resilient, observable, and cost-controlled LLM systems.
+Production-grade architectural patterns for building **resilient**, **contract-first**, and **cost-bounded** AI systems in Python.
 
-Rather than notebook prototypes or fragile prompt wrappers, this repository provides **Contract-First**, **FinOps-aware**, and **fault-tolerant** reference architectures designed for production AI engineering.
-
----
-
-## Core Architectural Pillars
-
-Every blueprint in this repository is built atop a shared, strictly typed foundational kernel (`src/blueprint_core/`):
-
-1. **Contract-First Execution (`contracts/`)**: All LLM outputs are strictly validated against Pydantic v2 schemas (`extra="forbid"`). Raw unvalidated strings never cross module boundaries.
-2. **Hybrid Cloud-to-Local Failover (`gateways/smart_router.py`)**: Primary cloud models automatically fail over to zero-cost local inference (e.g., Ollama) upon API timeouts, rate limits, or budget exhaustion.
-3. **FinOps Circuit Breakers (`resilience/budget_guard.py`)**: Real-time token spend tracking halts or reroutes execution before runaway loops or traffic spikes breach hard USD limits.
-4. **Structured Telemetry (`observability/telemetry.py`)**: Every inference call emits structured latency, token usage, cost, and routing state metrics.
+Unlike notebook-driven prototypes, every blueprint in this repository enforces strict **Pydantic v2 data contracts**, **hybrid Cloud-to-Local failover**, **FinOps circuit breakers**, and **100% deterministic unit testing** (`mypy --strict`, `ruff`, `pytest`).
 
 ---
 
-## Repository Structure
+## Core Architectural Pillars (`src/blueprint_core/`)
 
-```text
-ai-engineering-blueprints/
-├── blueprints/
-│   ├── 01_structured_web_ingestion/   # HTML sanitization & structured extraction
-│   └── 02_hybrid_rag_reranking/       # Hybrid RRF retrieval & citation verification
-├── docs/
-│   └── adr/                           # Architecture Decision Records
-│       ├── 001-hybrid-cloud-local-routing.md
-│       └── 002-hybrid-rag-rrf-and-citation-grounding.md
-├── src/
-│   └── blueprint_core/                # Shared resilient AI kernel
-│       ├── contracts/                 # Strict Pydantic v2 schemas (Web, RAG)
-│       ├── gateways/                  # SmartRouter (Cloud -> Local failover)
-│       ├── observability/             # ExecutionTracer & structured logs
-│       ├── resilience/                # BudgetGuard FinOps circuit breaker
-│       └── retrieval/                 # Hybrid RRF index & grounded RAG pipeline
-└── tests/
-    └── unit/                          # Deterministic, zero-network unit test suite
-```
+| Module | Responsibility | Key Engineering Pattern |
+| :--- | :--- | :--- |
+| `contracts/` | Input/Output schema enforcement | Strict Pydantic v2 models (`extra="forbid"`, cross-field validators) |
+| `gateways/` | Model execution & routing | `SmartRouter` with automatic Cloud -> Local failover |
+| `resilience/` | FinOps cost governance | `BudgetGuard` hard-cap circuit breaker before token execution |
+| `retrieval/` | Hybrid search & grounding | `HybridRRFIndex` (Lexical IDF + Dense Cosine) & citation verification |
+| `agents/` | Bounded autonomous loops | `ReflectiveAgentRunner` with `ToolRegistry` allow-listing & verifier feedback |
+| `observability/` | Structured telemetry | `ExecutionTracer` capturing latency, token usage, and fallback events |
 
 ---
 
-## Blueprint Catalog
+## Architectural Blueprints Catalog
 
-| Blueprint | Architectural Focus | Key Patterns | Status |
+| Blueprint | Focus Area | Key Guardrails | Status |
 | :--- | :--- | :--- | :--- |
-| **`01_structured_web_ingestion`** | Noise-reduction & schema-enforced extraction | HTML Sanitization, Contract-First Extraction, FinOps Guard | ✅ Production-Ready |
-| **`02_hybrid_rag_reranking`** | Hallucination-free technical retrieval & QA | Lexical + Dense RRF Fusion, Post-Generation Citation Guardrail | ✅ Production-Ready |
-
----
-
-## Quick Start
-
-### 1. Environment Setup
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-.\tasks.ps1 install
-```
-
-### 2. Run the Quality Gate (Lint + Format + Strict Types + Tests)
-
-```powershell
-.\tasks.ps1 check
-```
-
-### 3. Execute Blueprint Demos
-
-**Blueprint 01 — Structured Web Ingestion:**
-```powershell
-python blueprints/01_structured_web_ingestion/pipeline.py
-```
-
-**Blueprint 02 — Hybrid RAG & Citation Verification:**
-```powershell
-python blueprints/02_hybrid_rag_reranking/pipeline.py
-```
+| **`01_structured_web_ingestion`** | Unstructured HTML -> Validated Domain Entities | Pre-LLM HTML sanitization, entity normalization, FinOps budget cap | Production Ready |
+| **`02_hybrid_rag_reranking`** | Hybrid Retrieval (RRF) & Citation Grounding | Reciprocal Rank Fusion (`k=60`), post-generation `CitationHallucinationError` | Production Ready |
+| **`03_agentic_tool_use_and_reflection`** | Bounded Agentic State Machine (`Reason -> Act -> Verify`) | Allow-listed `ToolRegistry`, `ToolHallucinationError`, `MaxAgentStepsExceededError` | Production Ready |
 
 ---
 
 ## Architecture Decision Records (ADRs)
 
-* **[ADR-001: Hybrid Cloud-to-Local LLM Routing with FinOps Budget Circuit Breaker](docs/adr/001-hybrid-cloud-local-routing.md)**
-* **[ADR-002: Hybrid RAG with Reciprocal Rank Fusion (RRF) and Post-Generation Citation Verification](docs/adr/002-hybrid-rag-rrf-and-citation-grounding.md)**
+- **[ADR-001: Hybrid Cloud-to-Local LLM Routing & FinOps Circuit Breaking](docs/adr/001-hybrid-cloud-local-routing.md)**
+- **[ADR-002: Hybrid RRF Retrieval and Deterministic Citation Verification](docs/adr/002-hybrid-rag-and-citation-verification.md)**
+- **[ADR-003: Bounded Agentic Reflection and Deterministic Tool Allow-Listing](docs/adr/003-bounded-agentic-reflection.md)**
+
+---
+
+## Quick Start & Quality Gate
+
+1. **Install dependencies:** `.\tasks.ps1 install`
+2. **Run full quality gate (`ruff` + `mypy --strict` + `pytest`):** `.\tasks.ps1 check`
+3. **Run Blueprint 01 Demo:** `python blueprints/01_structured_web_ingestion/pipeline.py`
+4. **Run Blueprint 02 Demo:** `python blueprints/02_hybrid_rag_reranking/pipeline.py`
+5. **Run Blueprint 03 Demo:** `python blueprints/03_agentic_tool_use_and_reflection/pipeline.py`
